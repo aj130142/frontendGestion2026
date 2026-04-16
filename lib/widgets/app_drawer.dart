@@ -1,0 +1,81 @@
+import 'package:flutter/material.dart';
+import '../../providers/auth_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final user = auth.currentUser;
+
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              color: Colors.deepPurple,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person, color: Colors.deepPurple),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  user?.name ?? 'Usuario',
+                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  user?.email ?? '',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.dashboard, color: Colors.deepPurple),
+            title: const Text('Dashboard'),
+            onTap: () => context.go('/'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.person_outline, color: Colors.orange),
+            title: const Text('Clientes'),
+            onTap: () => context.go('/clients'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.folder_open, color: Colors.blue),
+            title: const Text('Proyectos'),
+            onTap: () => context.go('/projects'),
+          ),
+          if (user?.roleId == 1) ...[ // roleId used here
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.people_alt, color: Colors.blueGrey),
+              title: const Text('Gestión de Usuarios'),
+              onTap: () {
+                Navigator.pop(context);
+                context.go('/users');
+              },
+            ),
+          ],
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.logout, color: Colors.red),
+            title: const Text('Cerrar Sesión'),
+            onTap: () async {
+              await auth.logout();
+              if (context.mounted) context.go('/login');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
