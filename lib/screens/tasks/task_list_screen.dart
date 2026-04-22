@@ -67,6 +67,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         actions: [
+          if (widget.projectId != null)
+            TextButton.icon(
+              onPressed: () => context.go('/projects'),
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
+              label: const Text('Proyectos', style: TextStyle(color: Colors.white)),
+            ),
           IconButton(
             icon: const Icon(Icons.playlist_add),
             onPressed: () async {

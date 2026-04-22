@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../providers/user_provider.dart';
 import '../../models/user.dart';
+import '../../widgets/app_drawer.dart';
 
 class UserListScreen extends StatefulWidget {
   const UserListScreen({super.key});
@@ -25,6 +26,7 @@ class _UserListScreenState extends State<UserListScreen> {
     final userProv = context.watch<UserProvider>();
     
     return Scaffold(
+      drawer: const AppDrawer(),
       appBar: AppBar(
         title: const Text('Gestión de Usuarios'),
         backgroundColor: Colors.blueGrey,

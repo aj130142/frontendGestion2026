@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (success) {
-        context.go('/clients'); // Redirección a Clientes
+        context.go('/'); // Redirección al Dashboard
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error: Credenciales inválidas')),
