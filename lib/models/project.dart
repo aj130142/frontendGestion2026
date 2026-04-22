@@ -7,11 +7,22 @@ class Project {
   final String endDate;
   final String status; 
 
-  Project({this.id, required this.clientId, required this.name, required this.description, required this.startDate, required this.endDate, required this.status});
+  final String clientName;
+  final String clientCompany;
+
+  Project({this.id, required this.clientId, required this.name, required this.description, required this.startDate, required this.endDate, required this.status, this.clientName = '', this.clientCompany = ''});
 
   factory Project.fromJson(Map<String, dynamic> json) {
     String stName = 'Pendiente';
     if (json['estado'] != null) stName = json['estado']['nombre'] ?? 'Pendiente';
+    
+    String cName = 'Desconocido';
+    String cComp = 'N/A';
+    if (json['cliente'] != null) {
+      cName = json['cliente']['nombre'] ?? 'Desconocido';
+      cComp = json['cliente']['empresa'] ?? 'N/A';
+    }
+
     return Project(
       id: json['id_proyecto'],
       clientId: json['id_cliente'],
@@ -20,6 +31,8 @@ class Project {
       startDate: json['fecha_inicio'] ?? '',
       endDate: json['fecha_fin'] ?? '',
       status: stName,
+      clientName: cName,
+      clientCompany: cComp,
     );
   }
 

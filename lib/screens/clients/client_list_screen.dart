@@ -94,7 +94,7 @@ class _ClientListScreenState extends State<ClientListScreen> {
                     child: Text(client.name[0].toUpperCase()),
                   ),
                   title: Text(client.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Empresa: ${client.company}'),
+                  subtitle: Text('Empresa: ${client.company} | Tel: ${client.phone}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [

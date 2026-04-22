@@ -94,7 +94,14 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                     child: const Icon(Icons.work),
                   ),
                   title: Text(project.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Estado: ${project.status}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Cliente: ${project.clientName} (${project.clientCompany})'),
+                      Text('Inicio: ${project.startDate} | Fin: ${project.endDate ?? 'N/A'}'),
+                      Text('Estado: ${project.status}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [

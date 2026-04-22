@@ -26,8 +26,13 @@ class AppTask {
     if (json['prioridad'] != null) prName = json['prioridad']['nombre'] ?? 'Media';
 
     int? assignedUserId;
+    String respName = 'Sin asignar';
     if (json['usuarios'] != null && (json['usuarios'] as List).isNotEmpty) {
-      assignedUserId = json['usuarios'][0]['id_usuario'];
+      final firstUser = json['usuarios'][0];
+      if (firstUser['usuario'] != null) {
+        respName = firstUser['usuario']['nombre'] ?? 'Usuario';
+      }
+      assignedUserId = firstUser['id_usuario'];
     }
 
     return AppTask(
@@ -35,7 +40,7 @@ class AppTask {
       projectId: json['id_proyecto'],
       title: json['nombre'] ?? '',
       description: json['descripcion'] ?? '',
-      responsible: 'Usuario', 
+      responsible: respName, 
       priority: prName,
       status: stName,
       assignedUserId: assignedUserId,

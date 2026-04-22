@@ -111,7 +111,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     child: const Icon(Icons.assignment),
                   ),
                   title: Text(task.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Resp: ${task.assignedUserId ?? 'Sin asignar'} | ${task.status}'),
+                  subtitle: Text('Responsable: ${task.responsible} | Prioridad: ${task.priority} | ${task.status}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
