@@ -7,11 +7,16 @@ import 'providers/task_provider.dart';
 import 'providers/user_provider.dart';
 import 'utils/routes.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  final authProvider = AuthProvider();
+  await authProvider.checkToken(); // Restore session on startup
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider.value(value: authProvider),
         ChangeNotifierProvider(create: (_) => ClientProvider()),
         ChangeNotifierProvider(create: (_) => ProjectProvider()),
         ChangeNotifierProvider(create: (_) => TaskProvider()),
@@ -27,6 +32,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
+    final appRouter = AppRouter(authProvider).router;
+
     return MaterialApp.router(
       title: 'TechSolutions S.A.',
       debugShowCheckedModeBanner: false,
