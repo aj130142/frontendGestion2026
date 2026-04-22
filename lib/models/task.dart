@@ -25,6 +25,11 @@ class AppTask {
     String prName = 'Media';
     if (json['prioridad'] != null) prName = json['prioridad']['nombre'] ?? 'Media';
 
+    int? assignedUserId;
+    if (json['usuarios'] != null && (json['usuarios'] as List).isNotEmpty) {
+      assignedUserId = json['usuarios'][0]['id_usuario'];
+    }
+
     return AppTask(
       id: json['id_tarea'],
       projectId: json['id_proyecto'],
@@ -33,15 +38,15 @@ class AppTask {
       responsible: 'Usuario', 
       priority: prName,
       status: stName,
-      // Nota: El backend retorna una lista de usuarios. Tomamos el primero si existe.
+      assignedUserId: assignedUserId,
     );
   }
 
   Map<String, dynamic> toJson() {
-    int stId = 18; // Pendiente
-    if (status == 'En Progreso' || status == 'En progreso') stId = 19;
-    if (status == 'Completada') stId = 20;
-    if (status == 'Cancelada') stId = 21;
+    int stId = 7; // Pendiente
+    if (status == 'En Progreso' || status == 'En progreso') stId = 8;
+    if (status == 'Completada') stId = 9;
+    if (status == 'Cancelada') stId = 10;
 
     int prId = 2; // Media
     if (priority == 'Alta') prId = 1;

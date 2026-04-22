@@ -24,8 +24,10 @@ class TaskProvider extends ChangeNotifier {
   Future<bool> createTask(AppTask task) async {
     try {
       final newTask = await TaskService.createTask(task);
-      _tasks.add(newTask);
-      notifyListeners();
+      if (task.assignedUserId != null && newTask.id != null) {
+        await TaskService.assignUser(newTask.id!, task.assignedUserId!);
+      }
+      await fetchTasks();
       return true;
     } catch (e) {
       debugPrint("Error creating task: $e");

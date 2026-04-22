@@ -49,30 +49,37 @@ class _UserFormScreenState extends State<UserFormScreen> {
       setState(() => _isLoading = true);
       final prov = context.read<UserProvider>();
       
-      bool success;
-      if (widget.user == null) {
-        success = await prov.createUser(
-          _nameController.text,
-          _emailController.text,
-          _passController.text,
-          _roleId,
-        );
-      } else {
-        success = await prov.updateUser(
-          widget.user!.id,
-          _nameController.text,
-          _emailController.text,
-          _roleId,
-          _active,
-        );
-      }
-
-      if (mounted) {
-        setState(() => _isLoading = false);
-        if (success) {
-          context.pop();
+      bool success = false;
+      try {
+        if (widget.user == null) {
+          success = await prov.createUser(
+            _nameController.text,
+            _emailController.text,
+            _passController.text,
+            _roleId,
+          );
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al procesar solicitud')));
+          success = await prov.updateUser(
+            widget.user!.id,
+            _nameController.text,
+            _emailController.text,
+            _roleId,
+            _active,
+          );
+        }
+
+        if (mounted) {
+          setState(() => _isLoading = false);
+          if (success) {
+            context.pop();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error: Revisa los datos o permisos')));
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
         }
       }
     }
