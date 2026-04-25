@@ -20,6 +20,8 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _descController;
+  late TextEditingController _startDateController;
+  late TextEditingController _endDateController;
   
   int? _selectedProjectId;
   int? _selectedUserId;
@@ -35,6 +37,8 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
     super.initState();
     _titleController = TextEditingController(text: widget.task?.title ?? '');
     _descController = TextEditingController(text: widget.task?.description ?? '');
+    _startDateController = TextEditingController(text: widget.task?.startDate ?? DateTime.now().toString().split(' ')[0]);
+    _endDateController = TextEditingController(text: widget.task?.endDate ?? '');
     
     if (widget.task != null) {
       _selectedProjectId = widget.task!.projectId;
@@ -58,7 +62,23 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
   void dispose() {
     _titleController.dispose();
     _descController.dispose();
+    _startDateController.dispose();
+    _endDateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(BuildContext context, TextEditingController controller, {DateTime? firstDate, DateTime? lastDate}) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.tryParse(controller.text) ?? DateTime.now(),
+      firstDate: firstDate ?? DateTime(2000),
+      lastDate: lastDate ?? DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        controller.text = picked.toString().split(' ')[0];
+      });
+    }
   }
 
   Future<void> _submit() async {
@@ -66,6 +86,41 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       if (_selectedProjectId == null) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Por favor, selecciona un Proyecto')));
         return;
+      }
+
+      // Project range validation
+      final projects = context.read<ProjectProvider>().projects;
+      final project = projects.firstWhere((p) => p.id == _selectedProjectId);
+      
+      final taskStart = DateTime.parse(_startDateController.text);
+      final projectStart = DateTime.parse(project.startDate);
+      
+      if (taskStart.isBefore(projectStart)) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('La fecha de inicio no puede ser anterior a la del proyecto (${project.startDate})')));
+        return;
+      }
+
+      if (project.endDate.isNotEmpty) {
+        final projectEnd = DateTime.parse(project.endDate);
+        if (taskStart.isAfter(projectEnd)) {
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('La fecha de inicio no puede ser posterior a la del proyecto (${project.endDate})')));
+           return;
+        }
+        if (_endDateController.text.isNotEmpty) {
+           final taskEnd = DateTime.parse(_endDateController.text);
+           if (taskEnd.isAfter(projectEnd)) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('La fecha de fin no puede ser posterior a la del proyecto (${project.endDate})')));
+              return;
+           }
+        }
+      }
+
+      if (_endDateController.text.isNotEmpty) {
+        final taskEnd = DateTime.parse(_endDateController.text);
+        if (taskEnd.isBefore(taskStart)) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('La fecha de fin no puede ser anterior a la de inicio')));
+          return;
+        }
       }
 
       setState(() => _isLoading = true);
@@ -79,6 +134,8 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
           responsible: 'Usuario', 
           priority: _priority,
           status: _status,
+          startDate: _startDateController.text,
+          endDate: _endDateController.text.isEmpty ? null : _endDateController.text,
         );
 
         bool success;
@@ -93,7 +150,7 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
         if (success) {
           context.pop();
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al guardar la tarea')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al guardar la tarea (Verifica las fechas con el proyecto)')));
         }
       } catch (e) {
         if (!mounted) return;
@@ -154,6 +211,37 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
                   prefixIcon: Icon(Icons.title, color: Colors.teal),
                 ),
                 validator: (v) => v!.isEmpty ? 'Requerido' : null,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _startDateController,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Fecha Inicio',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.calendar_today, color: Colors.teal),
+                      ),
+                      onTap: () => _selectDate(context, _startDateController),
+                      validator: (v) => v!.isEmpty ? 'Requerido' : null,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _endDateController,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Fecha Fin (Opcional)',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.calendar_month, color: Colors.teal),
+                      ),
+                      onTap: () => _selectDate(context, _endDateController),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               TextFormField(

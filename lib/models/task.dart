@@ -8,6 +8,9 @@ class AppTask {
   final String status;
   final int? assignedUserId;
 
+  final String startDate;
+  final String? endDate;
+
   AppTask({
     this.id,
     required this.projectId,
@@ -17,6 +20,8 @@ class AppTask {
     required this.priority,
     required this.status,
     this.assignedUserId,
+    required this.startDate,
+    this.endDate,
   });
 
   factory AppTask.fromJson(Map<String, dynamic> json) {
@@ -44,6 +49,8 @@ class AppTask {
       priority: prName,
       status: stName,
       assignedUserId: assignedUserId,
+      startDate: json['fecha_inicio'] ?? '',
+      endDate: json['fecha_fin'],
     );
   }
 
@@ -64,6 +71,8 @@ class AppTask {
       'descripcion': description,
       'id_prioridad': prId,
       'id_estado': stId,
+      'fecha_inicio': startDate,
+      if (endDate != null) 'fecha_fin': endDate,
     };
   }
 }

@@ -111,7 +111,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     child: const Icon(Icons.assignment),
                   ),
                   title: Text(task.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Responsable: ${task.responsible} | Prioridad: ${task.priority} | ${task.status}'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Responsable: ${task.responsible}'),
+                      Text('Prioridad: ${task.priority} | Estado: ${task.status}'),
+                      Text('Fechas: ${task.startDate} a ${task.endDate ?? 'Pendiente'}', style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
+                    ],
+                  ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
