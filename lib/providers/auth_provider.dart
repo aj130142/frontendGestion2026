@@ -54,10 +54,22 @@ class AuthProvider extends ChangeNotifier {
     return false;
   }
 
+  /// (#6b) Logout completo: revoca el token en el servidor y limpia el estado local.
   Future<void> logout() async {
+    // Revocar token en el backend antes de limpiar localmente
+    if (_token != null) {
+      try {
+        await ApiService.post('/auth/logout/token', {'token': _token!});
+      } catch (_) {
+        // Si falla la revocación remota, continuar con el logout local
+        debugPrint("No se pudo revocar el token en el servidor");
+      }
+    }
+
     await ApiService.removeToken();
     _isAuthenticated = false;
     _token = null;
+    _currentUser = null;
     notifyListeners();
   }
 }

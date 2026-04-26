@@ -6,9 +6,11 @@ import 'providers/project_provider.dart';
 import 'providers/task_provider.dart';
 import 'providers/user_provider.dart';
 import 'utils/routes.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   
   final authProvider = AuthProvider();
   await authProvider.checkToken(); // Restore session on startup
