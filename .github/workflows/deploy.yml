@@ -25,8 +25,12 @@ jobs:
         run: flutter pub get
 
       - name: Build Web
-        # Importante: El base-href debe coincidir con el nombre de tu repositorio
-        run: flutter build web --release --base-href "/frontendGestion2026/"
+        # Importante: El base-href es "/" porque tu repositorio es aj130142.github.io (User Page)
+        run: flutter build web --release --base-href "/"
+
+      - name: Fix SPA Routing for GitHub Pages
+        run: cp ./build/web/index.html ./build/web/404.html
+
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
