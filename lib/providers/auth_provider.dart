@@ -15,12 +15,14 @@ class AuthProvider extends ChangeNotifier {
   User? get currentUser => _currentUser;
   bool get canDelete => _currentUser?.roleId == 1; // Solo Admin borra
 
-  Future<void> fetchProfile() async {
+  Future<bool> fetchProfile() async {
     final user = await AuthService.fetchProfile();
     if (user != null) {
       _currentUser = user;
       notifyListeners();
+      return true;
     }
+    return false;
   }
 
   Future<void> checkToken() async {
@@ -41,12 +43,18 @@ class AuthProvider extends ChangeNotifier {
     if (tokenData != null) {
       _token = tokenData;
       await ApiService.saveToken(_token!);
-      _isAuthenticated = true;
-      await fetchProfile();
-
-      _isLoading = false;
-      notifyListeners();
-      return true;
+      
+      // Intentar cargar el perfil antes de confirmar la autenticación
+      final profileSuccess = await fetchProfile();
+      if (profileSuccess) {
+        _isAuthenticated = true;
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        // Si el perfil falla (ej. error de red/CORS), limpiar todo
+        await logout();
+      }
     }
 
     _isLoading = false;
