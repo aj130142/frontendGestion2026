@@ -20,9 +20,16 @@ class ApiService {
     if (envUrl != null && envUrl.isNotEmpty) {
       return envUrl;
     }
-    if (kIsWeb) return 'https://web-production-92d26.up.railway.app';
-    if (Platform.isAndroid) return 'http://10.0.2.2:8000';
-    return 'http://localhost:8000';
+    
+    // Fallback production URL for all platforms if .env is missing
+    const productionUrl = 'https://web-production-92d26.up.railway.app';
+    
+    if (kIsWeb) return productionUrl;
+    
+    // For local development on mobile
+    // If not in web, and no .env, we assume production unless it's a specific local test
+    // To avoid issues with "credentials" on mobile, we default to production if env is null
+    return productionUrl; 
   }
 
   // (#8) Token en memoria para Flutter Web — NO se persiste en localStorage
@@ -47,9 +54,15 @@ class ApiService {
   }
 
   static Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
-    final url = Uri.parse(_buildUrl(endpoint));
+    final urlString = _buildUrl(endpoint);
+    final url = Uri.parse(urlString);
     final headers = await _getHeaders();
-    return await http.post(url, headers: headers, body: jsonEncode(body));
+    
+    debugPrint("API POST: $urlString");
+    final response = await http.post(url, headers: headers, body: jsonEncode(body));
+    debugPrint("API RESPONSE [${response.statusCode}]: $urlString");
+    
+    return response;
   }
 
   static Future<http.Response> postForm(String endpoint, Map<String, String> body) async {
@@ -59,9 +72,15 @@ class ApiService {
   }
 
   static Future<http.Response> get(String endpoint) async {
-    final url = Uri.parse(_buildUrl(endpoint));
+    final urlString = _buildUrl(endpoint);
+    final url = Uri.parse(urlString);
     final headers = await _getHeaders();
-    return await http.get(url, headers: headers);
+    
+    debugPrint("API GET: $urlString");
+    final response = await http.get(url, headers: headers);
+    debugPrint("API RESPONSE [${response.statusCode}]: $urlString");
+    
+    return response;
   }
 
   /// (#8) Guardar token de forma segura según la plataforma.

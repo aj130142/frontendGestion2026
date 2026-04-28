@@ -26,9 +26,11 @@ class AuthService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         return data['access_token'];
+      } else {
+        debugPrint("Login failed: ${response.statusCode} - ${response.body}");
       }
     } catch (e) {
-      debugPrint("Login error: $e");
+      debugPrint("Login error Exception: $e");
     }
     return null;
   }

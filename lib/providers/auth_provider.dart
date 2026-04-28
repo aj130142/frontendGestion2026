@@ -29,8 +29,14 @@ class AuthProvider extends ChangeNotifier {
     final t = await ApiService.getToken();
     if (t != null) {
       _token = t;
-      _isAuthenticated = true;
-      await fetchProfile();
+      // Intentar cargar el perfil. Si falla, el token no es válido o hay error de red.
+      final profileSuccess = await fetchProfile();
+      if (profileSuccess) {
+        _isAuthenticated = true;
+      } else {
+        // Si no se pudo cargar el perfil, limpiar el token para forzar login
+        await logout();
+      }
       notifyListeners();
     }
   }
@@ -39,22 +45,27 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final tokenData = await AuthService.login(username, password);
-    if (tokenData != null) {
-      _token = tokenData;
-      await ApiService.saveToken(_token!);
-      
-      // Intentar cargar el perfil antes de confirmar la autenticación
-      final profileSuccess = await fetchProfile();
-      if (profileSuccess) {
-        _isAuthenticated = true;
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      } else {
-        // Si el perfil falla (ej. error de red/CORS), limpiar todo
-        await logout();
+    try {
+      final tokenData = await AuthService.login(username, password);
+      if (tokenData != null) {
+        _token = tokenData;
+        await ApiService.saveToken(_token!);
+        
+        // Intentar cargar el perfil antes de confirmar la autenticación
+        final profileSuccess = await fetchProfile();
+        if (profileSuccess) {
+          _isAuthenticated = true;
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        } else {
+          // Si el perfil falla (ej. error de red/CORS), limpiar todo
+          debugPrint("Login: No se pudo cargar el perfil tras obtener token.");
+          await logout();
+        }
       }
+    } catch (e) {
+      debugPrint("AuthProvider Login Exception: $e");
     }
 
     _isLoading = false;
