@@ -54,7 +54,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canDelete = context.watch<AuthProvider>().canDelete;
+    final auth = context.watch<AuthProvider>();
+    final canCrear    = auth.puedeCrear('tareas');
+    final canEditar   = auth.puedeEditar('tareas');
+    final canEliminar = auth.puedeEliminar('tareas');
 
     return Scaffold(
       drawer: const AppDrawer(),
@@ -73,13 +76,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
               icon: const Icon(Icons.arrow_back, color: Colors.white, size: 18),
               label: const Text('Proyectos', style: TextStyle(color: Colors.white)),
             ),
-          IconButton(
-            icon: const Icon(Icons.playlist_add),
-            onPressed: () async {
-              await context.push('/tasks/new', extra: widget.projectId);
-              _refresh();
-            },
-          )
+          if (canCrear)
+            IconButton(
+              icon: const Icon(Icons.playlist_add),
+              onPressed: () async {
+                await context.push('/tasks/new', extra: widget.projectId);
+                _refresh();
+              },
+            )
         ],
       ),
       body: FutureBuilder<List<AppTask>>(
@@ -100,40 +104,141 @@ class _TaskListScreenState extends State<TaskListScreen> {
             itemBuilder: (context, index) {
               final task = tasks[index];
               return Card(
-                elevation: 3,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.teal.withOpacity(0.2),
-                    foregroundColor: Colors.teal,
-                    child: const Icon(Icons.assignment),
-                  ),
-                  title: Text(task.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Column(
+                elevation: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Responsable: ${task.responsible}'),
-                      Text('Prioridad: ${task.priority} | Estado: ${task.status}'),
-                      Text('Fechas: ${task.startDate} a ${task.endDate ?? 'Pendiente'}', style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
-                    ],
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () async {
-                          await context.push('/tasks/edit', extra: task);
-                          _refresh();
-                        },
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.teal.withOpacity(0.1),
+                            foregroundColor: Colors.teal,
+                            child: const Icon(Icons.assignment),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  task.title,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: _getStatusColor(task.status).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(color: _getStatusColor(task.status).withOpacity(0.5)),
+                                      ),
+                                      child: Text(
+                                        task.status,
+                                        style: TextStyle(
+                                          color: _getStatusColor(task.status),
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: _getPriorityColor(task.priority).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        task.priority,
+                                        style: TextStyle(
+                                          color: _getPriorityColor(task.priority),
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                await context.push('/tasks/edit', extra: task);
+                                _refresh();
+                              } else if (value == 'delete') {
+                                if (task.id != null) _deleteTask(task.id!);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              if (canEditar)
+                                const PopupMenuItem(
+                                  value: 'edit',
+                                  child: ListTile(
+                                    leading: Icon(Icons.edit, color: Colors.blue),
+                                    title: Text('Editar'),
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                              if (canEliminar)
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: ListTile(
+                                    leading: Icon(Icons.delete, color: Colors.redAccent),
+                                    title: Text('Eliminar'),
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
                       ),
-                      if (canDelete)
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.redAccent),
-                          onPressed: () => task.id != null ? _deleteTask(task.id!) : null,
+                      const SizedBox(height: 16),
+                      if (task.description.isNotEmpty) ...[
+                        Text(
+                          task.description,
+                          style: TextStyle(color: Colors.grey[800], height: 1.4),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: 16),
+                      ],
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              'Responsable: ${task.responsible}',
+                              style: const TextStyle(fontSize: 13, color: Colors.grey),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today_outlined, size: 16, color: Colors.grey),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${task.startDate} — ${task.endDate ?? 'Pendiente'}',
+                            style: const TextStyle(fontSize: 13, color: Colors.grey),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -143,5 +248,32 @@ class _TaskListScreenState extends State<TaskListScreen> {
         },
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completada':
+      case 'finalizada':
+        return Colors.green;
+      case 'en progreso':
+        return Colors.blue;
+      case 'cancelada':
+        return Colors.red;
+      case 'pendiente':
+      default:
+        return Colors.orange;
+    }
+  }
+
+  Color _getPriorityColor(String priority) {
+    switch (priority.toLowerCase()) {
+      case 'alta':
+        return Colors.red;
+      case 'media':
+        return Colors.orange;
+      case 'baja':
+      default:
+        return Colors.blue;
+    }
   }
 }

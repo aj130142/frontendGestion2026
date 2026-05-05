@@ -46,7 +46,10 @@ class _ClientListScreenState extends State<ClientListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canDelete = context.watch<AuthProvider>().canDelete;
+    final auth = context.watch<AuthProvider>();
+    final canCrear    = auth.puedeCrear('clientes');
+    final canEditar   = auth.puedeEditar('clientes');
+    final canEliminar = auth.puedeEliminar('clientes');
 
     return Scaffold(
       drawer: const AppDrawer(),
@@ -56,13 +59,14 @@ class _ClientListScreenState extends State<ClientListScreen> {
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.person_add),
-            onPressed: () async {
-              await context.push('/clients/new');
-              _refresh();
-            },
-          )
+          if (canCrear)
+            IconButton(
+              icon: const Icon(Icons.person_add),
+              onPressed: () async {
+                await context.push('/clients/new');
+                _refresh();
+              },
+            )
         ],
       ),
       body: FutureBuilder<List<Client>>(
@@ -83,33 +87,125 @@ class _ClientListScreenState extends State<ClientListScreen> {
             itemBuilder: (context, index) {
               final client = clients[index];
               return Card(
-                elevation: 3,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.blueAccent.withOpacity(0.2),
-                    foregroundColor: Colors.blueAccent,
-                    child: Text(client.name[0].toUpperCase()),
-                  ),
-                  title: Text(client.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('Empresa: ${client.company} | Tel: ${client.phone}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                elevation: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () async {
-                          await context.push('/clients/edit', extra: client);
-                          _refresh();
-                        },
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                            foregroundColor: Colors.blueAccent,
+                            child: Text(client.name[0].toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  client.name,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: (client.isActive ? Colors.green : Colors.red).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        client.isActive ? 'Activo' : 'Inactivo',
+                                        style: TextStyle(
+                                          color: client.isActive ? Colors.green : Colors.red,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    if (client.company.isNotEmpty) ...[
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          client.company,
+                                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          PopupMenuButton<String>(
+                            onSelected: (value) async {
+                              if (value == 'edit') {
+                                await context.push('/clients/edit', extra: client);
+                                _refresh();
+                              } else if (value == 'delete') {
+                                if (client.id != null) _deleteClient(client.id!);
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              if (canEditar)
+                                const PopupMenuItem(
+                                  value: 'edit',
+                                  child: ListTile(
+                                    leading: Icon(Icons.edit, color: Colors.blue),
+                                    title: Text('Editar'),
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                              if (canEliminar)
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: ListTile(
+                                    leading: Icon(Icons.delete, color: Colors.redAccent),
+                                    title: Text('Eliminar'),
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
                       ),
-                      if (canDelete)
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.redAccent),
-                          onPressed: () => client.id != null ? _deleteClient(client.id!) : null,
-                        ),
+                      const SizedBox(height: 16),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.email_outlined, size: 16, color: Colors.grey),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              client.email,
+                              style: const TextStyle(fontSize: 14, color: Colors.blueGrey),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Icon(Icons.phone_outlined, size: 16, color: Colors.grey),
+                          const SizedBox(width: 8),
+                          Text(
+                            client.phone.isNotEmpty ? client.phone : 'Sin teléfono',
+                            style: const TextStyle(fontSize: 14, color: Colors.blueGrey),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

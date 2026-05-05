@@ -44,20 +44,28 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Dashboard'),
             onTap: () => context.go('/'),
           ),
-          ListTile(
-            leading: const Icon(Icons.person_outline, color: Colors.orange),
-            title: const Text('Clientes'),
-            onTap: () => context.go('/clients'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.folder_open, color: Colors.blue),
-            title: const Text('Proyectos'),
-            onTap: () => context.go('/projects'),
-          ),
-          if (user?.roleId == 1) ...[ // roleId used here
+          if (auth.puedeVer('clientes'))
+            ListTile(
+              leading: const Icon(Icons.person_outline, color: Colors.orange),
+              title: const Text('Clientes'),
+              onTap: () => context.go('/clients'),
+            ),
+          if (auth.puedeVer('proyectos'))
+            ListTile(
+              leading: const Icon(Icons.folder_open, color: Colors.blue),
+              title: const Text('Proyectos'),
+              onTap: () => context.go('/projects'),
+            ),
+          if (auth.puedeVer('tareas'))
+            ListTile(
+              leading: const Icon(Icons.task_alt, color: Colors.green),
+              title: const Text('Tareas'),
+              onTap: () => context.go('/tasks'),
+            ),
+          if (auth.puedeVer('usuarios')) ...[
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.people_alt, color: Colors.blueGrey),
+              leading: const Icon(Icons.manage_accounts, color: Colors.blueGrey),
               title: const Text('Gestión de Usuarios'),
               onTap: () {
                 Navigator.pop(context);
