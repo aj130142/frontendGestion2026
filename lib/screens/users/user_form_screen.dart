@@ -127,6 +127,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 items: const [
                   DropdownMenuItem(value: 1, child: Text('Administrador')),
                   DropdownMenuItem(value: 2, child: Text('Usuario Estándar')),
+                  DropdownMenuItem(value: 3, child: Text('Cliente')),
                 ],
                 onChanged: (val) => setState(() => _roleId = val!),
               ),

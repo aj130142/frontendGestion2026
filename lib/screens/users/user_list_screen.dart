@@ -37,6 +37,13 @@ class _UserListScreenState extends State<UserListScreen> {
         backgroundColor: Colors.blueGrey[800],
         foregroundColor: Colors.white,
         elevation: 2,
+        actions: [
+          if (canCrear)
+            IconButton(
+              icon: const Icon(Icons.person_add),
+              onPressed: () => context.push('/users/form'),
+            ),
+        ],
       ),
       body: userProv.isLoading
           ? const Center(child: CircularProgressIndicator())
