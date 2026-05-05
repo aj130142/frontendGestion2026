@@ -5,8 +5,9 @@ class Client {
   final String phone;
   final String company;
   final bool isActive;
+  final String? password;
 
-  Client({this.id, required this.name, required this.email, required this.phone, required this.company, this.isActive = true});
+  Client({this.id, required this.name, required this.email, required this.phone, required this.company, this.isActive = true, this.password});
 
   factory Client.fromJson(Map<String, dynamic> json) {
     return Client(
@@ -27,6 +28,7 @@ class Client {
       'telefono': phone,
       'empresa': company,
       'id_estado': isActive ? 1 : 2,
+      if (password != null && password!.isNotEmpty) 'password': password,
     };
   }
 }
