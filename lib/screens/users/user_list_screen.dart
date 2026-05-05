@@ -113,35 +113,36 @@ class _UserListScreenState extends State<UserListScreen> {
                                 ],
                               ),
                             ),
-                            PopupMenuButton<String>(
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  context.push('/users/form', extra: user);
-                                } else if (value == 'delete') {
-                                  _confirmDelete(user);
-                                }
-                              },
-                              itemBuilder: (context) => [
-                                if (canEditar)
-                                  const PopupMenuItem(
-                                    value: 'edit',
-                                    child: ListTile(
-                                      leading: Icon(Icons.edit, color: Colors.blue),
-                                      title: Text('Editar'),
-                                      contentPadding: EdgeInsets.zero,
+                            if (canEditar || canEliminar)
+                              PopupMenuButton<String>(
+                                onSelected: (value) {
+                                  if (value == 'edit') {
+                                    context.push('/users/form', extra: user);
+                                  } else if (value == 'delete') {
+                                    _confirmDelete(user);
+                                  }
+                                },
+                                itemBuilder: (context) => [
+                                  if (canEditar)
+                                    const PopupMenuItem(
+                                      value: 'edit',
+                                      child: ListTile(
+                                        leading: Icon(Icons.edit, color: Colors.blue),
+                                        title: Text('Editar'),
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
                                     ),
-                                  ),
-                                if (canEliminar)
-                                  const PopupMenuItem(
-                                    value: 'delete',
-                                    child: ListTile(
-                                      leading: Icon(Icons.delete, color: Colors.red),
-                                      title: Text('Eliminar'),
-                                      contentPadding: EdgeInsets.zero,
+                                  if (canEliminar)
+                                    const PopupMenuItem(
+                                      value: 'delete',
+                                      child: ListTile(
+                                        leading: Icon(Icons.delete, color: Colors.red),
+                                        title: Text('Eliminar'),
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
                                     ),
-                                  ),
-                              ],
-                            ),
+                                ],
+                              ),
                           ],
                         ),
                         const SizedBox(height: 12),

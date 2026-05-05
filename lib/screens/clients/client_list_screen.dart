@@ -148,36 +148,37 @@ class _ClientListScreenState extends State<ClientListScreen> {
                               ],
                             ),
                           ),
-                          PopupMenuButton<String>(
-                            onSelected: (value) async {
-                              if (value == 'edit') {
-                                await context.push('/clients/edit', extra: client);
-                                _refresh();
-                              } else if (value == 'delete') {
-                                if (client.id != null) _deleteClient(client.id!);
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              if (canEditar)
-                                const PopupMenuItem(
-                                  value: 'edit',
-                                  child: ListTile(
-                                    leading: Icon(Icons.edit, color: Colors.blue),
-                                    title: Text('Editar'),
-                                    contentPadding: EdgeInsets.zero,
+                          if (canEditar || canEliminar)
+                            PopupMenuButton<String>(
+                              onSelected: (value) async {
+                                if (value == 'edit') {
+                                  await context.push('/clients/edit', extra: client);
+                                  _refresh();
+                                } else if (value == 'delete') {
+                                  if (client.id != null) _deleteClient(client.id!);
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                if (canEditar)
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: ListTile(
+                                      leading: Icon(Icons.edit, color: Colors.blue),
+                                      title: Text('Editar'),
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
                                   ),
-                                ),
-                              if (canEliminar)
-                                const PopupMenuItem(
-                                  value: 'delete',
-                                  child: ListTile(
-                                    leading: Icon(Icons.delete, color: Colors.redAccent),
-                                    title: Text('Eliminar'),
-                                    contentPadding: EdgeInsets.zero,
+                                if (canEliminar)
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: ListTile(
+                                      leading: Icon(Icons.delete, color: Colors.redAccent),
+                                      title: Text('Eliminar'),
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
+                              ],
+                            ),
                         ],
                       ),
                       const SizedBox(height: 16),

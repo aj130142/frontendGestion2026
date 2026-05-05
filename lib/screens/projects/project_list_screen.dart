@@ -50,6 +50,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     final canCrearProyecto  = auth.puedeCrear('proyectos');
     final canEditar         = auth.puedeEditar('proyectos');
     final canEliminar       = auth.puedeEliminar('proyectos');
+    final canVerTareas      = auth.puedeVer('tareas');
     final canCrearTarea     = auth.puedeCrear('tareas');
 
     return Scaffold(
@@ -136,58 +137,60 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                               ],
                             ),
                           ),
-                          PopupMenuButton<String>(
-                            onSelected: (value) async {
-                              if (value == 'tasks') {
-                                context.push('/tasks?projectId=${project.id}&projectName=${Uri.encodeComponent(project.name)}');
-                              } else if (value == 'add_task') {
-                                await context.push('/tasks/new', extra: project.id);
-                                _refresh();
-                              } else if (value == 'edit') {
-                                await context.push('/projects/edit', extra: project);
-                                _refresh();
-                              } else if (value == 'delete') {
-                                if (project.id != null) _deleteProject(project.id!);
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 'tasks',
-                                child: ListTile(
-                                  leading: Icon(Icons.list_alt, color: Colors.teal),
-                                  title: Text('Ver Tareas'),
-                                  contentPadding: EdgeInsets.zero,
-                                ),
-                              ),
-                              if (canCrearTarea)
-                                const PopupMenuItem(
-                                  value: 'add_task',
-                                  child: ListTile(
-                                    leading: Icon(Icons.playlist_add, color: Colors.green),
-                                    title: Text('Agregar Tarea'),
-                                    contentPadding: EdgeInsets.zero,
+                          if (canVerTareas || canCrearTarea || canEditar || canEliminar)
+                            PopupMenuButton<String>(
+                              onSelected: (value) async {
+                                if (value == 'tasks') {
+                                  context.push('/tasks?projectId=${project.id}&projectName=${Uri.encodeComponent(project.name)}');
+                                } else if (value == 'add_task') {
+                                  await context.push('/tasks/new', extra: project.id);
+                                  _refresh();
+                                } else if (value == 'edit') {
+                                  await context.push('/projects/edit', extra: project);
+                                  _refresh();
+                                } else if (value == 'delete') {
+                                  if (project.id != null) _deleteProject(project.id!);
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                if (canVerTareas)
+                                  const PopupMenuItem(
+                                    value: 'tasks',
+                                    child: ListTile(
+                                      leading: Icon(Icons.list_alt, color: Colors.teal),
+                                      title: Text('Ver Tareas'),
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
                                   ),
-                                ),
-                              if (canEditar)
-                                const PopupMenuItem(
-                                  value: 'edit',
-                                  child: ListTile(
-                                    leading: Icon(Icons.edit, color: Colors.blue),
-                                    title: Text('Editar'),
-                                    contentPadding: EdgeInsets.zero,
+                                if (canCrearTarea)
+                                  const PopupMenuItem(
+                                    value: 'add_task',
+                                    child: ListTile(
+                                      leading: Icon(Icons.playlist_add, color: Colors.green),
+                                      title: Text('Agregar Tarea'),
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
                                   ),
-                                ),
-                              if (canEliminar)
-                                const PopupMenuItem(
-                                  value: 'delete',
-                                  child: ListTile(
-                                    leading: Icon(Icons.delete, color: Colors.redAccent),
-                                    title: Text('Eliminar'),
-                                    contentPadding: EdgeInsets.zero,
+                                if (canEditar)
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: ListTile(
+                                      leading: Icon(Icons.edit, color: Colors.blue),
+                                      title: Text('Editar'),
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
+                                if (canEliminar)
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: ListTile(
+                                      leading: Icon(Icons.delete, color: Colors.redAccent),
+                                      title: Text('Eliminar'),
+                                      contentPadding: EdgeInsets.zero,
+                                    ),
+                                  ),
+                              ],
+                            ),
                         ],
                       ),
                       const SizedBox(height: 16),
