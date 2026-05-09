@@ -37,9 +37,10 @@ class Project {
   }
 
   Map<String, dynamic> toJson() {
-    int stId = 6; 
+    int stId = 6; // Pendiente
     if (status == 'En progreso' || status == 'En Progreso') stId = 3;
     if (status == 'Completado' || status == 'Finalizado') stId = 4;
+    if (status == 'Cancelado') stId = 5;
     return {
       if (id != null) 'id_proyecto': id,
       'id_cliente': clientId,

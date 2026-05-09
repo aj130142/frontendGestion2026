@@ -42,10 +42,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
       _error = null;
     });
     try {
-      List<AppTask> tasks = await TaskService.getTasks();
-      if (widget.projectId != null) {
-        tasks = tasks.where((t) => t.projectId == widget.projectId).toList();
-      }
+      // Filtrado directo desde el servidor para máxima precisión
+      final tasks = await TaskService.getTasks(projectId: widget.projectId);
+      
       setState(() {
         _allTasks = tasks;
         _filterTasks(_searchController.text);

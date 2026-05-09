@@ -55,9 +55,9 @@ class AppTask {
   }
 
   Map<String, dynamic> toJson() {
-    int stId = 7; // Pendiente
+    int stId = 7; // Pendiente (tarea)
     if (status == 'En Progreso' || status == 'En progreso') stId = 8;
-    if (status == 'Completada') stId = 9;
+    if (status == 'Completada' || status == 'Finalizada') stId = 9;
     if (status == 'Cancelada') stId = 10;
 
     int prId = 2; // Media
