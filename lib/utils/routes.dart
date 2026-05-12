@@ -12,6 +12,7 @@ import '../screens/projects/project_form_screen.dart';
 import '../models/project.dart';
 import '../screens/tasks/task_list_screen.dart';
 import '../screens/tasks/task_form_screen.dart';
+import '../screens/tasks/general_history_screen.dart';
 import '../screens/users/user_list_screen.dart';
 import '../screens/users/user_form_screen.dart';
 import '../models/task.dart';
@@ -114,6 +115,10 @@ class AppRouter {
           GoRoute(
             path: '/tasks/form',
             builder: (context, state) => TaskFormScreen(task: state.extra as AppTask?),
+          ),
+          GoRoute(
+            path: '/tasks/history',
+            builder: (context, state) => const GeneralHistoryScreen(),
           ),
           GoRoute(
             path: '/users',
