@@ -16,6 +16,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get token => _token;
   User? get currentUser => _currentUser;
+  bool get isAdmin => _currentUser?.roleId == 1;
 
   // ─── Helpers de permiso por módulo ──────────────────────────────────────────
 

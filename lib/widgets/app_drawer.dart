@@ -72,6 +72,15 @@ class AppDrawer extends StatelessWidget {
                 context.go('/users');
               },
             ),
+            if (auth.isAdmin)
+              ListTile(
+                leading: const Icon(Icons.security, color: Colors.teal),
+                title: const Text('Permisos de Roles'),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.go('/users/permissions');
+                },
+              ),
           ],
           const Divider(),
           ListTile(

@@ -17,6 +17,7 @@ import '../screens/users/user_list_screen.dart';
 import '../screens/users/user_form_screen.dart';
 import '../models/task.dart';
 import '../models/user.dart';
+import '../screens/users/permission_management_screen.dart';
 
 class AppRouter {
   final AuthProvider authProvider;
@@ -40,6 +41,7 @@ class AppRouter {
           if (path.startsWith('/clients') && !authProvider.puedeVer('clientes')) return '/';
           if (path.startsWith('/projects') && !authProvider.puedeVer('proyectos')) return '/';
           if (path.startsWith('/tasks') && !authProvider.puedeVer('tareas')) return '/';
+          if (path.startsWith('/users/permissions') && !authProvider.isAdmin) return '/';
           if (path.startsWith('/users') && !authProvider.puedeVer('usuarios')) return '/';
 
           return null;
@@ -127,6 +129,10 @@ class AppRouter {
           GoRoute(
             path: '/users/form',
             builder: (context, state) => UserFormScreen(user: state.extra as User?),
+          ),
+          GoRoute(
+            path: '/users/permissions',
+            builder: (context, state) => const PermissionManagementScreen(),
           ),
         ],
       );

@@ -38,6 +38,12 @@ class _UserListScreenState extends State<UserListScreen> {
         foregroundColor: Colors.white,
         elevation: 2,
         actions: [
+          if (auth.isAdmin)
+            IconButton(
+              icon: const Icon(Icons.security),
+              tooltip: 'Permisos de Roles',
+              onPressed: () => context.push('/users/permissions'),
+            ),
           if (canCrear)
             IconButton(
               icon: const Icon(Icons.person_add),
