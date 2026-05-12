@@ -46,18 +46,28 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> checkToken() async {
+    _isLoading = true;
+    notifyListeners();
+    
     final t = await ApiService.getToken();
     if (t != null) {
       _token = t;
-      final profileSuccess = await fetchProfile();
-      if (profileSuccess) {
-        await _fetchPermisos();
-        _isAuthenticated = true;
-      } else {
+      try {
+        final profileSuccess = await fetchProfile();
+        if (profileSuccess) {
+          await _fetchPermisos();
+          _isAuthenticated = true;
+        } else {
+          await logout();
+        }
+      } catch (e) {
+        debugPrint("Error restoring session: $e");
         await logout();
       }
-      notifyListeners();
     }
+    
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<bool> login(String username, String password) async {

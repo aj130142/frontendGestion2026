@@ -258,7 +258,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                         return PieChartSectionData(
                                                           value: s.count.toDouble(),
                                                           title: total > 0 ? '${percentage.toStringAsFixed(0)}%' : '0%',
-                                                          radius: 60,
+                                                          radius: MediaQuery.of(context).size.width < 600 ? 50 : 60,
                                                           color: _getStatusColor(s.status),
                                                           titleStyle: const TextStyle(
                                                             fontSize: 16,
@@ -268,8 +268,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                           ),
                                                         );
                                                       }).toList(),
-                                                      sectionsSpace: 3,
-                                                      centerSpaceRadius: 60,
+                                                        sectionsSpace: 3,
+                                                        centerSpaceRadius: MediaQuery.of(context).size.width < 600 ? 50 : 60,
                                                     ),
                                                   ),
                                                   Column(
@@ -277,11 +277,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                     children: [
                                                       Text(
                                                         '$total',
-                                                        style: const TextStyle(
-                                                          fontSize: 32,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: Colors.blueAccent,
-                                                        ),
+                                                          style: TextStyle(
+                                                            fontSize: MediaQuery.of(context).size.width < 600 ? 24 : 32,
+                                                            fontWeight: FontWeight.bold,
+                                                            color: Colors.blueAccent,
+                                                          ),
                                                       ),
                                                       const Text(
                                                         'Tareas',
@@ -299,26 +299,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             const SizedBox(height: 24),
                                             Wrap(
                                               spacing: 16,
-                                              runSpacing: 8,
+                                              runSpacing: 12,
+                                              alignment: WrapAlignment.center,
                                               children: _stats.map((s) {
                                                 final double percentage = total > 0 ? (s.count / total * 100) : 0;
-                                                return Row(
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Container(
-                                                      width: 12,
-                                                      height: 12,
-                                                      decoration: BoxDecoration(
-                                                        color: _getStatusColor(s.status),
-                                                        shape: BoxShape.circle,
+                                                return Container(
+                                                  constraints: BoxConstraints(
+                                                    minWidth: MediaQuery.of(context).size.width < 600 ? double.infinity : 0,
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Container(
+                                                        width: 12,
+                                                        height: 12,
+                                                        decoration: BoxDecoration(
+                                                          color: _getStatusColor(s.status),
+                                                          shape: BoxShape.circle,
+                                                        ),
                                                       ),
-                                                    ),
-                                                    const SizedBox(width: 8),
-                                                    Text(
-                                                      '${s.status}: ${s.count} (${percentage.toStringAsFixed(1)}%)',
-                                                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                                                    ),
-                                                  ],
+                                                      const SizedBox(width: 8),
+                                                      Text(
+                                                        '${s.status}: ${s.count} (${percentage.toStringAsFixed(1)}%)',
+                                                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 );
                                               }).toList(),
                                             ),
@@ -367,8 +373,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: MediaQuery.of(context).size.width > 900 ? 4 : (MediaQuery.of(context).size.width > 600 ? 2 : 1),
       crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 2.5,
+      mainAxisSpacing: 12,
+      childAspectRatio: MediaQuery.of(context).size.width < 600 ? 3.5 : 2.5,
       children: cards,
     );
   }
