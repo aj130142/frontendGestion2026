@@ -28,6 +28,10 @@ jobs:
         # Importante: El base-href debe coincidir con el nombre de tu repositorio
         run: flutter build web --release --base-href "/frontendGestion2026/"
 
+      - name: Fix SPA Routing for GitHub Pages
+        run: cp ./build/web/index.html ./build/web/404.html
+
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:

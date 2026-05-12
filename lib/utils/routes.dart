@@ -26,15 +26,20 @@ class AppRouter {
         initialLocation: '/',
         refreshListenable: authProvider,
         redirect: (context, state) {
-          final loggingIn = state.uri.path == '/login' || state.uri.path == '/register';
+          final path = state.uri.path;
+          final loggingIn = path == '/login' || path == '/register';
 
           if (!authProvider.isAuthenticated) {
             return loggingIn ? null : '/login';
           }
 
-          if (loggingIn) {
-            return '/';
-          }
+          if (loggingIn) return '/';
+
+          // Redirigir al dashboard si el usuario no tiene permiso de ver el módulo
+          if (path.startsWith('/clients') && !authProvider.puedeVer('clientes')) return '/';
+          if (path.startsWith('/projects') && !authProvider.puedeVer('proyectos')) return '/';
+          if (path.startsWith('/tasks') && !authProvider.puedeVer('tareas')) return '/';
+          if (path.startsWith('/users') && !authProvider.puedeVer('usuarios')) return '/';
 
           return null;
         },

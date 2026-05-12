@@ -5,11 +5,22 @@ import 'api_service.dart';
 class TaskService {
   static const String endpoint = '/tareas';
 
-  static Future<List<AppTask>> getTasks() async {
-    final response = await ApiService.get(endpoint);
+  static Future<List<AppTask>> getTasks({int? projectId}) async {
+    String url = endpoint;
+    if (projectId != null) {
+      url += '?id_proyecto=$projectId';
+    }
+    final response = await ApiService.get(url);
     if (response.statusCode == 200) {
       final List data = jsonDecode(response.body);
-      return data.map((e) => AppTask.fromJson(e)).toList();
+      return data.map((e) {
+        try {
+          return AppTask.fromJson(e);
+        } catch (err) {
+          print("Error parsing task: $err");
+          return null;
+        }
+      }).whereType<AppTask>().toList();
     }
     throw Exception('Error al cargar tareas');
   }

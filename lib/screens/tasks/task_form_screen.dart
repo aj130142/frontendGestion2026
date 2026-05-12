@@ -101,17 +101,21 @@ class _TaskFormScreenState extends State<TaskFormScreen> {
       }
 
       if (project.endDate.isNotEmpty) {
-        final projectEnd = DateTime.parse(project.endDate);
-        if (taskStart.isAfter(projectEnd)) {
-           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('La fecha de inicio no puede ser posterior a la del proyecto (${project.endDate})')));
-           return;
-        }
-        if (_endDateController.text.isNotEmpty) {
-           final taskEnd = DateTime.parse(_endDateController.text);
-           if (taskEnd.isAfter(projectEnd)) {
+        try {
+          final projectEnd = DateTime.parse(project.endDate);
+          if (taskStart.isAfter(projectEnd)) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('La fecha de inicio no puede ser posterior a la del proyecto (${project.endDate})')));
+            return;
+          }
+          if (_endDateController.text.isNotEmpty) {
+            final taskEnd = DateTime.parse(_endDateController.text);
+            if (taskEnd.isAfter(projectEnd)) {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('La fecha de fin no puede ser posterior a la del proyecto (${project.endDate})')));
               return;
-           }
+            }
+          }
+        } catch (e) {
+          debugPrint("Error parsing project end date: ${project.endDate}");
         }
       }
 

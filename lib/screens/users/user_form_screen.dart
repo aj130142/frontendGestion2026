@@ -124,11 +124,13 @@ class _UserFormScreenState extends State<UserFormScreen> {
               DropdownButtonFormField<int>(
                 value: _roleId,
                 decoration: const InputDecoration(labelText: 'Rol', border: OutlineInputBorder()),
-                items: const [
-                  DropdownMenuItem(value: 1, child: Text('Administrador')),
-                  DropdownMenuItem(value: 2, child: Text('Usuario Estándar')),
+                items: [
+                  const DropdownMenuItem(value: 1, child: Text('Administrador')),
+                  const DropdownMenuItem(value: 2, child: Text('Usuario Estándar')),
+                  if (_roleId == 3)
+                    const DropdownMenuItem(value: 3, child: Text('Cliente')),
                 ],
-                onChanged: (val) => setState(() => _roleId = val!),
+                onChanged: widget.user?.roleId == 3 ? null : (val) => setState(() => _roleId = val!),
               ),
               if (widget.user != null) ...[
                 const SizedBox(height: 20),

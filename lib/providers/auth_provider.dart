@@ -1,52 +1,99 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
+import '../models/permission.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
+import '../services/permission_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   bool _isAuthenticated = false;
   bool _isLoading = false;
   String? _token;
   User? _currentUser;
+  PermissionMap _permisos = {};
 
   bool get isAuthenticated => _isAuthenticated;
   bool get isLoading => _isLoading;
   String? get token => _token;
   User? get currentUser => _currentUser;
-  bool get canDelete => _currentUser?.roleId == 1; // Solo Admin borra
 
-  Future<void> fetchProfile() async {
+  // ─── Helpers de permiso por módulo ──────────────────────────────────────────
+
+  /// Retorna el objeto Permission para el módulo dado.
+  /// Si no existe la entrada, devuelve Permission.none (sin acceso).
+  Permission permiso(String modulo) => _permisos[modulo] ?? Permission.none;
+
+  bool puedeVer(String modulo)      => permiso(modulo).ver;
+  bool puedeCrear(String modulo)    => permiso(modulo).crear;
+  bool puedeEditar(String modulo)   => permiso(modulo).editar;
+  bool puedeEliminar(String modulo) => permiso(modulo).eliminar;
+
+  // ─── Carga de datos ─────────────────────────────────────────────────────────
+
+  Future<bool> fetchProfile() async {
     final user = await AuthService.fetchProfile();
     if (user != null) {
       _currentUser = user;
       notifyListeners();
+      return true;
     }
+    return false;
+  }
+
+  Future<void> _fetchPermisos() async {
+    _permisos = await PermissionService.fetchPermisos();
+    notifyListeners();
   }
 
   Future<void> checkToken() async {
+    _isLoading = true;
+    notifyListeners();
+    
     final t = await ApiService.getToken();
     if (t != null) {
       _token = t;
-      _isAuthenticated = true;
-      await fetchProfile();
-      notifyListeners();
+      try {
+        final profileSuccess = await fetchProfile();
+        if (profileSuccess) {
+          await _fetchPermisos();
+          _isAuthenticated = true;
+        } else {
+          await logout();
+        }
+      } catch (e) {
+        debugPrint("Error restoring session: $e");
+        await logout();
+      }
     }
+    
+    _isLoading = false;
+    notifyListeners();
   }
 
   Future<bool> login(String username, String password) async {
     _isLoading = true;
     notifyListeners();
 
-    final tokenData = await AuthService.login(username, password);
-    if (tokenData != null) {
-      _token = tokenData;
-      await ApiService.saveToken(_token!);
-      _isAuthenticated = true;
-      await fetchProfile();
+    try {
+      final tokenData = await AuthService.login(username, password);
+      if (tokenData != null) {
+        _token = tokenData;
+        await ApiService.saveToken(_token!);
 
-      _isLoading = false;
-      notifyListeners();
-      return true;
+        final profileSuccess = await fetchProfile();
+        if (profileSuccess) {
+          await _fetchPermisos();
+          _isAuthenticated = true;
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        } else {
+          debugPrint("Login: No se pudo cargar el perfil tras obtener token.");
+          await logout();
+        }
+      }
+    } catch (e) {
+      debugPrint("AuthProvider Login Exception: $e");
     }
 
     _isLoading = false;
@@ -56,12 +103,10 @@ class AuthProvider extends ChangeNotifier {
 
   /// (#6b) Logout completo: revoca el token en el servidor y limpia el estado local.
   Future<void> logout() async {
-    // Revocar token en el backend antes de limpiar localmente
     if (_token != null) {
       try {
         await ApiService.post('/auth/logout/token', {'token': _token!});
       } catch (_) {
-        // Si falla la revocación remota, continuar con el logout local
         debugPrint("No se pudo revocar el token en el servidor");
       }
     }
@@ -70,6 +115,7 @@ class AuthProvider extends ChangeNotifier {
     _isAuthenticated = false;
     _token = null;
     _currentUser = null;
+    _permisos = {};
     notifyListeners();
   }
 }

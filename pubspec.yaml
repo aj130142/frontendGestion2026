@@ -40,6 +40,9 @@ dependencies:
   go_router: ^17.2.0
   intl: ^0.20.2
   flutter_dotenv: ^5.2.1
+  pdf: ^3.12.0
+  printing: ^5.14.3
+  fl_chart: ^1.2.0
 
 dev_dependencies:
   flutter_test:

@@ -18,6 +18,7 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   late TextEditingController _companyController;
+  late TextEditingController _passwordController;
   bool _isActive = true;
   bool _isLoading = false;
 
@@ -28,6 +29,7 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
     _emailController = TextEditingController(text: widget.client?.email ?? '');
     _phoneController = TextEditingController(text: widget.client?.phone ?? '');
     _companyController = TextEditingController(text: widget.client?.company ?? '');
+    _passwordController = TextEditingController();
     _isActive = widget.client?.isActive ?? true;
   }
 
@@ -37,6 +39,7 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _companyController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -51,6 +54,7 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
           phone: _phoneController.text,
           company: _companyController.text,
           isActive: _isActive,
+          password: _passwordController.text.isNotEmpty ? _passwordController.text : null,
         );
 
         if (widget.client == null) {
@@ -117,6 +121,19 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 20),
+              if (widget.client == null) ...[
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Contraseña (Opcional - Crea un usuario para el cliente)',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock, color: Colors.blueAccent),
+                  ),
+                  validator: (v) => v != null && v.isNotEmpty && v.length < 6 ? 'Mínimo 6 caracteres' : null,
+                ),
+                const SizedBox(height: 20),
+              ],
               TextFormField(
                 controller: _companyController,
                 decoration: const InputDecoration(
